@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.next/
+.turbo/
+coverage/
+*.log
+.env
+.env.*.local
+.DS_Store
+
+# Local-only config that may carry secrets (MCP server keys, personal Claude settings)
+.mcp.json
+.claude/settings.local.json
