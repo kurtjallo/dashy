@@ -13,11 +13,24 @@ activity from Claude Code, Cursor, Devin, and Copilot, with agent attribution an
 - `docs/` — PRD.md (what/why), FEATURE-SPECS.md (feature contracts), ARCHITECTURE.md (how;
   ADR-001..007 record the locked decisions — read before structural changes, don't relitigate).
 
+## Run it locally (first-time setup)
+
+```sh
+docker compose up -d              # start postgres + redis
+cp .env.example .env              # local env (api loads the repo-root .env)
+pnpm --filter @dashy/api migrate  # apply the database schema
+pnpm dev                          # start both servers
+```
+
+- Web dashboard → http://localhost:3000
+- API → http://localhost:4000 (health check: http://localhost:4000/health)
+
 ## Commands
 
 - `pnpm dev` / `pnpm build` / `pnpm typecheck` / `pnpm lint` / `pnpm test` (Turborepo, all workspaces)
 - `docker compose up -d` — local postgres + redis
 - `pnpm --filter @dashy/api migrate` / `migrate:create` — node-pg-migrate; never edit applied migrations
+- Always verify with the **root** gate (`pnpm lint` / `test` / `build`), never a single-package subset
 
 ## Locked decisions (ADRs)
 
