@@ -8,6 +8,16 @@ on:
 jobs:
   checks:
     runs-on: ubuntu-latest
+    # Placeholder env so apps/api/src/config/env.ts (zod, parsed at import) validates.
+    # The suite is pure unit tests — no DB/Redis connection is opened — so these are
+    # never dialed; they only need to satisfy the schema (URL shape, 32-char secrets).
+    env:
+      DATABASE_URL: postgres://dashy:dashy@localhost:5432/dashy_test
+      REDIS_URL: redis://localhost:6379
+      SESSION_SECRET: ci-placeholder-session-secret-0000000000
+      ENCRYPTION_KEY: ci-placeholder-encryption-key-00000000000
+      GITHUB_OAUTH_CLIENT_ID: ci-placeholder-client-id
+      GITHUB_OAUTH_CLIENT_SECRET: ci-placeholder-client-secret
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
