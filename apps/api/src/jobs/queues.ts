@@ -15,3 +15,6 @@ export interface NormalizeJobData {
 
 /** The 'normalize' queue — webhook payloads enqueued here, drained by the normalize worker. */
 export const normalizeQueue = new Queue<NormalizeJobData>('normalize', { connection });
+
+/** The 'slack-drain' queue — carries the repeatable tick that drains slack_alert_queue. */
+export const slackDrainQueue = new Queue('slack-drain', { connection });

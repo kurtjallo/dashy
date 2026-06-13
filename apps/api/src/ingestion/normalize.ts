@@ -3,6 +3,8 @@ import type { ActionType } from '@dashy/shared';
 import { query } from '../db/pool.js';
 import { newId } from '../lib/ids.js';
 import { attribute } from '../attribution/attribute.js';
+import { publishAgentEvent } from '../realtime/publish.js';
+import { evaluateSlackRules } from '../notifications/slack/rules.js';
 
 /**
  * Pure GitHub event -> canonical-event mapper. Extracted from `normalizeJob` so the
@@ -21,7 +23,7 @@ export function mapGithubEvent(
   event: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- public test helper: raw webhook payload is intentionally untyped
   payload: any,
-): { action_type: ActionType; repo: string | null; actor: string | null; impact: string; occurred_at: string; payload_ref: object } | null {
+): { action_type: ActionType; repo: string | null; actor: string | null; impact: string; occurred_at: string; payload_ref: Record<string, unknown> } | null {
   const repo: string | null = payload?.repository?.full_name ?? null;
   const defaultBranch: string | undefined = payload?.repository?.default_branch ?? undefined;
   const now = new Date().toISOString();
@@ -129,7 +131,7 @@ export async function normalizeJob(job: { data: NormalizeJobData }): Promise<voi
 
   const dedupKey = `gh:${deliveryId}`;
 
-  await query(
+  const inserted = await query<{ id: string }>(
     `INSERT INTO events (
        id, workspace_id, source_id, source, agent_id, agent_hint,
        repo, actor, actor_login, actor_kind, confidence,
@@ -139,7 +141,8 @@ export async function normalizeJob(job: { data: NormalizeJobData }): Promise<voi
        $6, $7, $7, $8, $9,
        $10, $11, $12, $13, $14
      )
-     ON CONFLICT (workspace_id, dedup_key) DO NOTHING`,
+     ON CONFLICT (workspace_id, dedup_key) DO NOTHING
+     RETURNING id`,
     [
       newId('evt'),
       workspaceId,
@@ -157,4 +160,24 @@ export async function normalizeJob(job: { data: NormalizeJobData }): Promise<voi
       JSON.stringify(mapped.payload_ref),
     ],
   );
+
+  // ON CONFLICT no-op (redelivered webhook) returns no row — only fan out for a
+  // genuinely new event. Post-commit fan-out is best-effort: a Slack/Redis hiccup
+  // must never fail (and thus retry/duplicate) this job.
+  const eventId = inserted[0]?.id;
+  if (!eventId) return;
+
+  try {
+    await publishAgentEvent(eventId);
+    await evaluateSlackRules({
+      workspaceId,
+      eventId,
+      action_type: mapped.action_type,
+      actor_kind: actorKind,
+      repo: mapped.repo,
+      payload_ref: mapped.payload_ref,
+    });
+  } catch (err) {
+    console.error('[normalize] post-insert fan-out failed', { eventId, err });
+  }
 }

@@ -9,6 +9,7 @@ export default tseslint.config(
       '**/.next/**',
       '**/node_modules/**',
       '**/.turbo/**',
+      '**/.claude/**', // agent harness/tooling scratch dir; not application source
       '**/coverage/**',
       '**/next-env.d.ts', // Next.js generated; not ours to lint
     ],

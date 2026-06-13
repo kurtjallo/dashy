@@ -16,6 +16,11 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # apps/api validates the root .env (zod) at import. The example file holds
+      # schema-valid placeholders; the test suite is pure (no DB/Redis connection
+      # opens), so this is all it needs. Loaded inside the task via dotenv — a job
+      # env: block does not work here because turbo filters task environments.
+      - run: cp .env.example .env
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm test
