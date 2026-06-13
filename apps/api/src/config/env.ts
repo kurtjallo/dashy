@@ -9,7 +9,10 @@ import { z } from 'zod';
 loadEnv({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../../../../.env') });
 
 const envSchema = z.object({
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().default(4000),
+  API_BASE_URL: z.string().url().default('http://localhost:4000'),
+  WEB_ORIGIN: z.string().url().default('http://localhost:3000'),
   DATABASE_URL: z.string().url(),
   REDIS_URL: z.string().url(),
   SESSION_SECRET: z.string().min(32),
