@@ -2,13 +2,11 @@ import type { ActivityEvent } from '@dashy/shared';
 
 export const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
-/** Shape returned by GET /api/v1/me. workspace.name drives the header. */
+/** Shape returned by GET /api/v1/me (matches apps/api routes/auth.ts). */
 export interface Me {
   user: {
     id: string;
-    login: string;
-    name: string | null;
-    email: string | null;
+    github_login: string;
     avatar_url: string | null;
   };
   workspace: {
