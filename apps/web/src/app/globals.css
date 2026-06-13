@@ -164,6 +164,44 @@ a {
   letter-spacing: -0.01em;
 }
 
+.page-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.page-title-row .page-title {
+  margin: 0;
+}
+
+/* ---------- Live status pill ---------- */
+.live-pill {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  letter-spacing: 0.01em;
+}
+
+.live-pill--live {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.12);
+  border-color: rgba(74, 222, 128, 0.25);
+}
+
+.live-pill--reconnecting {
+  color: var(--medium);
+  background: rgba(253, 176, 34, 0.12);
+  border-color: rgba(253, 176, 34, 0.25);
+}
+
+.live-pill--polling {
+  color: var(--text-muted);
+  background: var(--bg-hover);
+}
+
 /* ---------- Connect a repo ---------- */
 .repo-connect-bar {
   display: flex;
@@ -230,6 +268,103 @@ a {
   color: var(--high);
   font-size: 13px;
   margin: 0 0 10px;
+}
+
+/* ---------- Slack settings ---------- */
+.slack-panel {
+  margin-bottom: 18px;
+}
+
+.slack-row {
+  flex-wrap: wrap;
+}
+
+.slack-row-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.slack-status {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 999px;
+  text-transform: capitalize;
+  flex: 0 0 auto;
+}
+
+.slack-status--active {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.12);
+}
+
+.slack-status--failing {
+  color: var(--high);
+  background: rgba(249, 112, 102, 0.14);
+}
+
+.slack-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.slack-test-result {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.slack-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.slack-input {
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.slack-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.slack-input--url {
+  flex: 1;
+  min-width: 220px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.slack-add-btn {
+  width: auto;
+}
+
+.slack-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.slack-toggle input {
+  cursor: pointer;
+}
+
+.slack-toggle-hint {
+  font-size: 12.5px;
 }
 
 /* ---------- Summary ---------- */
