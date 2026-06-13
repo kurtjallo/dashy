@@ -6,6 +6,8 @@ import authRoutes from './routes/auth.js';
 import reposRoutes from './routes/repos.js';
 import webhooksRoutes from './routes/webhooks.js';
 import feedRoutes from './routes/feed.js';
+import streamRoutes from './routes/stream.js';
+import slackRoutes from './routes/slack.js';
 
 /** Route registration lives in src/http/routes/ — one file per resource. */
 export async function buildServer() {
@@ -20,6 +22,8 @@ export async function buildServer() {
   await app.register(reposRoutes, { prefix: '/api/v1' });
   await app.register(webhooksRoutes, { prefix: '/api/v1' });
   await app.register(feedRoutes, { prefix: '/api/v1' });
+  await app.register(streamRoutes, { prefix: '/api/v1' });
+  await app.register(slackRoutes, { prefix: '/api/v1' });
 
   return app;
 }
