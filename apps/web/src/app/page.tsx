@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ActivityEvent } from '@dashy/shared';
 import { API, devLogin, getFeed, getMe, logout, type Me } from '@/lib/api';
+import { useEventStream } from '@/lib/useEventStream';
 import ActivityCard from '@/components/ActivityCard';
 import Summary from '@/components/Summary';
 import RepoConnect from '@/components/RepoConnect';
+import SlackSettings from '@/components/SlackSettings';
 
 const IS_DEV = process.env.NODE_ENV !== 'production';
 
@@ -38,6 +40,18 @@ export default function Home() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  // Prepend newly-streamed events, deduped by id, newest first.
+  const onStreamEvent = useCallback((event: ActivityEvent) => {
+    setEvents((prev) => {
+      if (prev.some((e) => e.id === event.id)) return prev;
+      const next = [event, ...prev];
+      next.sort((a, b) => b.occurred_at.localeCompare(a.occurred_at));
+      return next;
+    });
+  }, []);
+
+  const streamStatus = useEventStream(status === 'signed-in', onStreamEvent);
 
   const onDevLogin = useCallback(async () => {
     if (await devLogin()) window.location.reload();
@@ -103,8 +117,18 @@ export default function Home() {
         </button>
       </header>
 
-      <h1 className="page-title">Overnight activity</h1>
+      <div className="page-title-row">
+        <h1 className="page-title">Overnight activity</h1>
+        <span className={`live-pill live-pill--${streamStatus}`}>
+          {streamStatus === 'live'
+            ? '● Live'
+            : streamStatus === 'polling'
+              ? '● Polling'
+              : 'Reconnecting…'}
+        </span>
+      </div>
       <RepoConnect onConnected={() => void load()} />
+      <SlackSettings />
 
       <Summary events={events} />
 
