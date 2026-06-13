@@ -1,0 +1,40 @@
+# Local development: `docker compose up -d` then `pnpm dev`
+# (api can also run fully containerized: `docker compose --profile app up`)
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: dashy
+      POSTGRES_PASSWORD: dashy
+      POSTGRES_DB: dashy
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dashy"]
+      interval: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 5
+
+  api:
+    profiles: [app]
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://dashy:dashy@postgres:5432/dashy
+      REDIS_URL: redis://redis:6379
+    ports: ["4000:4000"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+volumes:
+  pgdata:

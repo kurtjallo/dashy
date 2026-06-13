@@ -1,0 +1,29 @@
+import { config as loadEnv } from 'dotenv';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+import { z } from 'zod';
+
+// Local dev: load the monorepo-root .env regardless of cwd — turbo runs each package's
+// script from the package dir, so a plain dotenv/config would miss the root file. In
+// production the platform injects env vars and no .env exists, so this is a harmless no-op.
+loadEnv({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../../../../.env') });
+
+const envSchema = z.object({
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  PORT: z.coerce.number().default(4000),
+  API_BASE_URL: z.string().url().default('http://localhost:4000'),
+  // Public base URL GitHub uses to reach the webhook receiver (e.g. an ngrok https URL
+  // in local dev). Falls back to API_BASE_URL when unset (prod, where the API is public).
+  WEBHOOK_PUBLIC_URL: z.string().url().optional(),
+  WEB_ORIGIN: z.string().url().default('http://localhost:3000'),
+  DATABASE_URL: z.string().url(),
+  REDIS_URL: z.string().url(),
+  SESSION_SECRET: z.string().min(32),
+  ENCRYPTION_KEY: z.string().min(32),
+  GITHUB_OAUTH_CLIENT_ID: z.string(),
+  GITHUB_OAUTH_CLIENT_SECRET: z.string(),
+  SENTRY_DSN: z.string().optional(),
+});
+
+const parsed = envSchema.parse(process.env);
+export const config = { port: parsed.PORT, ...parsed };
