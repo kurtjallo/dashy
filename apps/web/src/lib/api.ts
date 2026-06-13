@@ -42,6 +42,35 @@ export async function getFeed(): Promise<ActivityEvent[] | null> {
   return env.events ?? env.items ?? [];
 }
 
+/** A GitHub repo as returned by GET /api/v1/repos. */
+export interface RepoItem {
+  githubRepoId: number;
+  fullName: string;
+  connected: boolean;
+}
+
+/** List the signed-in user's GitHub repos with connection status, or null on 401. */
+export async function getRepos(): Promise<RepoItem[] | null> {
+  const body = await getJson<{ repos: RepoItem[] }>('/api/v1/repos');
+  return body?.repos ?? null;
+}
+
+/** Connect a repo (installs the webhook). Returns the resulting webhook status. */
+export async function connectRepo(
+  fullName: string,
+  githubRepoId: number,
+): Promise<{ ok: boolean; status?: string; note?: string }> {
+  const res = await fetch(`${API}/api/v1/repos`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'content-type': 'application/json', accept: 'application/json' },
+    body: JSON.stringify({ fullName, githubRepoId }),
+  });
+  if (!res.ok) return { ok: false };
+  const data = (await res.json()) as { repo?: { webhook_status?: string }; note?: string };
+  return { ok: true, status: data.repo?.webhook_status, note: data.note };
+}
+
 /** Dev-only credential bypass. Returns true on success. */
 export async function devLogin(): Promise<boolean> {
   const res = await fetch(`${API}/api/v1/auth/dev-login`, {

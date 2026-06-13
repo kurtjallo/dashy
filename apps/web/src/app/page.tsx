@@ -5,6 +5,7 @@ import type { ActivityEvent } from '@dashy/shared';
 import { API, devLogin, getFeed, getMe, logout, type Me } from '@/lib/api';
 import ActivityCard from '@/components/ActivityCard';
 import Summary from '@/components/Summary';
+import RepoConnect from '@/components/RepoConnect';
 
 const IS_DEV = process.env.NODE_ENV !== 'production';
 
@@ -103,6 +104,7 @@ export default function Home() {
       </header>
 
       <h1 className="page-title">Overnight activity</h1>
+      <RepoConnect onConnected={() => void load()} />
 
       <Summary events={events} />
 
