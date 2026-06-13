@@ -127,7 +127,10 @@ const plugin: FastifyPluginAsync = async (app) => {
       const repoRow = inserted[0];
       if (!repoRow) return reply.code(500).send({ error: 'insert_failed' });
 
-      const webhookUrl = `${config.API_BASE_URL}/api/v1/webhooks/github?src=${sourceId}`;
+      // GitHub must be able to reach this URL. Locally that means a tunnel (ngrok) set
+      // in WEBHOOK_PUBLIC_URL; falls back to API_BASE_URL in production.
+      const webhookBase = config.WEBHOOK_PUBLIC_URL ?? config.API_BASE_URL;
+      const webhookUrl = `${webhookBase}/api/v1/webhooks/github?src=${sourceId}`;
 
       try {
         const { hookId } = await createWebhook(token, fullName, secret, webhookUrl);
